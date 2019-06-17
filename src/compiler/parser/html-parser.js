@@ -124,7 +124,7 @@ export function parseHTML (html, options) {
           !conditionalComment.test(rest)
         ) {
           // < in plain text, be forgiving and treat it as text
-          next = rest.indexOf('<', 1)
+          next = rest.indexOf('<', 1) // 后面是否还有 <
           if (next < 0) break
           textEnd += next
           rest = html.slice(textEnd)
@@ -143,7 +143,7 @@ export function parseHTML (html, options) {
       if (options.chars && text) {
         options.chars(text, index - text.length, index)
       }
-    } else {
+    } else { //  in a plaintext content element like script/style
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
       const reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'))
@@ -184,16 +184,27 @@ export function parseHTML (html, options) {
     html = html.substring(n)
   }
 
+  /**
+   * 创建match数据结构
+   * 初始化的状态
+   * 只有
+   * tagName
+   * attrs
+   *    attrs自己是个数组 也就是 正则达到的效果。。
+   * start
+   * end
+   */
   function parseStartTag () {
     const start = html.match(startTagOpen)
     if (start) {
-      const match = {
+      const match = { // 匹配startTag的数据结构
         tagName: start[1],
         attrs: [],
         start: index
       }
       advance(start[0].length)
       let end, attr
+      // 取属性值
       while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
         attr.start = index
         advance(attr[0].length)
@@ -201,7 +212,7 @@ export function parseHTML (html, options) {
         match.attrs.push(attr)
       }
       if (end) {
-        match.unarySlash = end[1]
+        match.unarySlash = end[1] // 是否为 一元标记 直接闭合
         advance(end[0].length)
         match.end = index
         return match
@@ -209,6 +220,7 @@ export function parseHTML (html, options) {
     }
   }
 
+  // parseStartTag 拿到的是 match
   function handleStartTag (match) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
@@ -217,16 +229,16 @@ export function parseHTML (html, options) {
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag(lastTag)
       }
-      if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
+      if (canBeLeftOpenTag(tagName) && lastTag === tagName) {  // 同时出现  两个dt才会直接 ？？？
         parseEndTag(tagName)
       }
     }
 
-    const unary = isUnaryTag(tagName) || !!unarySlash
+    const unary = isUnaryTag(tagName) || !!unarySlash // 一元判断
 
     const l = match.attrs.length
     const attrs = new Array(l)
-    for (let i = 0; i < l; i++) {
+    for (let i = 0; i < l; i++) { // 将attrs的 数组模式变成  { name:'xx',value:'xxx' }
       const args = match.attrs[i]
       const value = args[3] || args[4] || args[5] || ''
       const shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
@@ -242,7 +254,7 @@ export function parseHTML (html, options) {
       }
     }
 
-    if (!unary) {
+    if (!unary) { // 非一元标签处理方式
       stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs, start: match.start, end: match.end })
       lastTag = tagName
     }
@@ -251,6 +263,7 @@ export function parseHTML (html, options) {
       options.start(tagName, attrs, unary, match.start, match.end)
     }
   }
+
 
   function parseEndTag (tagName, start, end) {
     let pos, lowerCasedTagName

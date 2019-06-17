@@ -21,11 +21,11 @@ import {
   getAndRemoveAttrByRegex
 } from '../helpers'
 
-export const onRE = /^@|^v-on:/
-export const dirRE = process.env.VBIND_PROP_SHORTHAND
+export const onRE = /^@|^v-on:/  // 事件正则   @click 或者  v-on:click
+export const dirRE = process.env.VBIND_PROP_SHORTHAND // 自定义指令   v-focus  :focus  @focus  .focus  等等都是自定义指令
   ? /^v-|^@|^:|^\./
   : /^v-|^@|^:/
-export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
+export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/ // for
 export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 const dynamicArgRE = /^\[.*\]$/
@@ -200,7 +200,6 @@ export function parse (
       )
     }
   }
-
   parseHTML(template, {
     warn,
     expectHTML: options.expectHTML,
@@ -396,6 +395,7 @@ export function parse (
       }
     }
   })
+  debugger
   return root
 }
 
@@ -764,7 +764,7 @@ function processAttrs (el) {
     if (dirRE.test(name)) {
       // mark element as dynamic
       el.hasBindings = true
-      // modifiers
+      // modifiers  ？？？ 什么玩意
       modifiers = parseModifiers(name.replace(dirRE, ''))
       // support .foo shorthand syntax for the .prop modifier
       if (process.env.VBIND_PROP_SHORTHAND && propBindRE.test(name)) {

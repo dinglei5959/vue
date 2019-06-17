@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js wrapper component example (jquery plugin: select2)</title>
+    <!-- Delete ".min" for console warnings in development -->
+    <script src="../../dist/vue.js"></script>
+    <style>
+      html, body {
+        font: 13px/18px sans-serif;
+      }
+      select {
+        min-width: 300px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="el">
+    </div>
+
+    <!-- using string template here to work around HTML <option> placement restriction -->
+    <script type="text/x-template" id="demo-template">
+      <div id="dfd" class='test' key="lei">
+
+        <div v-for="(item,index) in options" :key="item.id">
+          {{item.id}}
+          <div>{{item.text}}</div>
+        </div>
+
+        <test-slot>
+            <div>{{name}}</div>
+        </test-slot>
+        
+      </div>
+    </script>
+
+    <script type="text/x-template" id="slot-template">
+    
+        <div>
+            <slot :age="6" class="d"></slot>
+        </div>
+    </script>
+
+    
+    <script>
+
+
+     Vue.component('testSlot', {
+        template: '#slot-template'
+      })
+
+    var vm = 
+    new Vue({
+      el: '#el',
+      template: '#demo-template',
+      data: {
+        name:"dinglei",
+        options: [
+          { id: 1, text: 'Hello' },
+          { id: 2, text: 'World' }
+        ]
+      }
+    })
+    </script>
+  </body>
+</html>

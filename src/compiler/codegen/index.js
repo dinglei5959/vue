@@ -44,7 +44,7 @@ export function generate (
   ast: ASTElement | void,
   options: CompilerOptions
 ): CodegenResult {
-  const state = new CodegenState(options)
+  const state = new CodegenState(options) // 全程记录当前编译状态的参数
   const code = ast ? genElement(ast, state) : '_c("div")'
   return {
     render: `with(this){return ${code}}`,
@@ -57,16 +57,17 @@ export function genElement (el: ASTElement, state: CodegenState): string {
     el.pre = el.pre || el.parent.pre
   }
 
-  if (el.staticRoot && !el.staticProcessed) {
+  if (el.staticRoot && !el.staticProcessed) { // 这里使用了 staicRoot optimize 里面做的标记
     return genStatic(el, state)
   } else if (el.once && !el.onceProcessed) {
     return genOnce(el, state)
   } else if (el.for && !el.forProcessed) {
-    return genFor(el, state)
+    return genFor(el, state);
   } else if (el.if && !el.ifProcessed) {
     return genIf(el, state)
   } else if (el.tag === 'template' && !el.slotTarget && !state.pre) {
-    return genChildren(el, state) || 'void 0'
+    let a =  genChildren(el, state) || 'void 0'
+    return a
   } else if (el.tag === 'slot') {
     return genSlot(el, state)
   } else {
@@ -77,7 +78,7 @@ export function genElement (el: ASTElement, state: CodegenState): string {
     } else {
       let data
       if (!el.plain || (el.pre && state.maybeComponent(el))) {
-        data = genData(el, state)
+        data = genData(el, state) // 处理  标签所有属性
       }
 
       const children = el.inlineTemplate ? null : genChildren(el, state, true)
@@ -114,7 +115,7 @@ function genStatic (el: ASTElement, state: CodegenState): string {
   })`
 }
 
-// v-once
+// v-once  本质就是static
 function genOnce (el: ASTElement, state: CodegenState): string {
   el.onceProcessed = true
   if (el.if && !el.ifProcessed) {
@@ -122,7 +123,7 @@ function genOnce (el: ASTElement, state: CodegenState): string {
   } else if (el.staticInFor) {
     let key = ''
     let parent = el.parent
-    while (parent) {
+    while (parent) { // 先找到key
       if (parent.for) {
         key = parent.key
         break
@@ -193,7 +194,6 @@ export function genFor (
   const alias = el.alias
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
   const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
-
   if (process.env.NODE_ENV !== 'production' &&
     state.maybeComponent(el) &&
     el.tag !== 'slot' &&
