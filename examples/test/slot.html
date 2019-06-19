@@ -21,7 +21,7 @@
 
     <!-- using string template here to work around HTML <option> placement restriction -->
     <script type="text/x-template" id="demo-template">
-      <div id="dfd" class='test' key="lei">
+      <div is="fdsf" id="dfd" class='test' key="lei">
 
         <div v-for="(item,index) in options" :key="item.id">
           {{item.id}}
@@ -31,6 +31,7 @@
         <test-slot>
             <div>{{name}}</div>
         </test-slot>
+        <div slot="test">ddd</div>
         
       </div>
     </script>

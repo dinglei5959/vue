@@ -585,6 +585,7 @@ export function addIfCondition (el: ASTElement, condition: ASTIfCondition) {
     el.ifConditions = []
   }
   el.ifConditions.push(condition)
+  debugger
 }
 
 function processOnce (el) {

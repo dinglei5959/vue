@@ -117,17 +117,18 @@ export default class Watcher {
         traverse(value)
       }
       popTarget()
-      this.cleanupDeps()
+      this.cleanupDeps() // 清除
     }
     return value
   }
 
   /**
    * Add a dependency to this directive.
+   * 
    */
-  addDep (dep: Dep) {
+  addDep (dep: Dep) { 
     const id = dep.id
-    if (!this.newDepIds.has(id)) {
+    if (!this.newDepIds.has(id)) { // 新的。。 空的。。
       this.newDepIds.add(id)
       this.newDeps.push(dep)
       if (!this.depIds.has(id)) {
@@ -138,20 +139,22 @@ export default class Watcher {
 
   /**
    * Clean up for dependency collection.
+   * 
+   * 先搜集后clean。。
    */
   cleanupDeps () {
     let i = this.deps.length
     while (i--) {
-      const dep = this.deps[i]
-      if (!this.newDepIds.has(dep.id)) {
+      const dep = this.deps[i] // 当前watcher 不用的dep   去删除。。
+      if (!this.newDepIds.has(dep.id)) { // 对比的原因是 有的可能已经注销了。 属性可能吧eying了俄。
         dep.removeSub(this)
       }
     }
     let tmp = this.depIds
     this.depIds = this.newDepIds
-    this.newDepIds = tmp
-    this.newDepIds.clear()
-    tmp = this.deps
+    this.newDepIds = tmp  // 新变老
+    this.newDepIds.clear() //  清除ids
+    tmp = this.deps 
     this.deps = this.newDeps
     this.newDeps = tmp
     this.newDeps.length = 0
