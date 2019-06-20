@@ -18,10 +18,19 @@ import type { SimpleSet } from '../util/index'
 
 let uid = 0
 
+
+
 /**
  * A watcher parses an expression, collects dependencies,
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
+ * 
+ * 问？：当我的一个属性，一开始搜集一些依赖，但是突然我又用不着这些依赖了。我该怎么办
+ * 比如我watch 了 data的 一个属性，且这个属性在render中使用了。但是突然render中不用了。而
+ * 这个属性发生更改后， 又给render推送了。这就麻烦了，
+ * 所以我们涉及到一个操作------～～～～ 那就是  去依赖操作。
+ * 这就是vue 设计了   newDep  Dep到原因。
+ * 只要老的dep 有哪个依赖   在newDep没有，  说明就不用了。。
  */
 export default class Watcher {
   vm: Component;
@@ -124,15 +133,17 @@ export default class Watcher {
 
   /**
    * Add a dependency to this directive.
-   * 
+   * 注意设置新旧机制就是为了去除没有用的属性 之前收集的依赖。
+   * 考虑的角度是双向的。。
+   * 机制一定是为了解决某种问题的。
    */
   addDep (dep: Dep) { 
     const id = dep.id
-    if (!this.newDepIds.has(id)) { // 新的。。 空的。。
-      this.newDepIds.add(id)
+    if (!this.newDepIds.has(id)) {
+      this.newDepIds.add(id) // 新的添加。。
       this.newDeps.push(dep)
       if (!this.depIds.has(id)) {
-        dep.addSub(this)
+        dep.addSub(this)  // 属性的依赖收集该watcher。。。
       }
     }
   }
@@ -147,7 +158,7 @@ export default class Watcher {
     while (i--) {
       const dep = this.deps[i] // 当前watcher 不用的dep   去删除。。
       if (!this.newDepIds.has(dep.id)) { // 对比的原因是 有的可能已经注销了。 属性可能吧eying了俄。
-        dep.removeSub(this)
+        dep.removeSub(this) // 老的属性中 依赖集
       }
     }
     let tmp = this.depIds
@@ -238,7 +249,7 @@ export default class Watcher {
       }
       let i = this.deps.length
       while (i--) {
-        this.deps[i].removeSub(this)
+        this.deps[i].removeSub(this) // 删除所有到这个
       }
       this.active = false
     }
